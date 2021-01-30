@@ -55,11 +55,31 @@ const int MotorPin4 = 5;
 void setup() {
     Serial.begin(9600);
 
-  /*I2C*/
+  Serial.println ();
+  Serial.println ("I2C scanner. Scanning ...");
+  byte count = 0;
+
+   /*I2C*/
   Wire.begin();
   Wire.begin(9);
   Wire.onReceive(receiveEvent);
-  Serial.println("\nI2C Scanner");
+  for (byte i = 8; i < 120; i++)
+  { Wire.beginTransmission (i);
+  if (Wire.endTransmission () == 0)
+  {
+  Serial.print ("Found address: ");
+  Serial.print (i, DEC);
+  Serial.print (" (0x");
+  Serial.print (i, HEX);
+  Serial.println (")");
+  count++;
+  delay (1);
+  } // end of good response
+  } // end of for loop
+  Serial.println ("Done.");
+  Serial.print ("Found ");
+  Serial.print (count, DEC);
+  Serial.println (" device(s).");
   
     //motor 1
   pinMode(MotorPin1, OUTPUT);
@@ -73,50 +93,11 @@ void setup() {
 }
 void loop() 
 {
-  
-byte error, address;
-  int nDevices;
 
-  Serial.println("Scanning...");
-
-  nDevices = 0;
-  for(address = 1; address < 127; address++ ) 
-  {
-    // The i2c_scanner uses the return value of
-    // the Write.endTransmisstion to see if
-    // a device did acknowledge to the address.
-    Wire.beginTransmission(address);
-    error = Wire.endTransmission();
-
-    if (error == 0)
-    {
-      Serial.print("I2C device found at address 0x");
-      if (address<16) 
-        Serial.print("0");
-      Serial.print(address,HEX);
-      Serial.println("  !");
-
-      nDevices++;
-    }
-    else if (error==4) 
-    {
-      Serial.print("Unknow error at address 0x");
-      if (address<16) 
-        Serial.print("0");
-      Serial.println(address,HEX);
-    }    
-  }
-  if (nDevices == 0)
-    Serial.println("No I2C devices found\n");
-  else
-    Serial.println("done\n");
-
-  delay(5000);
-  
   Wire.beginTransmission(10); 
   Wire.write("Hello Esp"); 
   Wire.endTransmission(); 
-  switch (state)
+  /*switch (state)
   {
     case State_running:
     {
@@ -222,5 +203,5 @@ byte error, address;
         digitalWrite(MotorPin4, LOW);            
         }
     }
-  }
+  }*/
 }
