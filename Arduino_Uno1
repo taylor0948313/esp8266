@@ -1,0 +1,183 @@
+#include <Wire.h>
+
+typedef enum
+{ State_victim,
+  State_irrechts,
+  State_irlinks,
+  State_ground,
+  State_obstacle,
+  State_parkingup,
+  State_parkingdown,
+  State_parkingleft,
+  State_parkingright,
+  State_stop,
+  State_running,
+} current_state;
+current_state state;
+
+/*I2C*/
+int VICT = 0;
+int IRR = 0;
+int IRL = 0;
+int GR = 0;
+int OBS = 0;
+int PUP = 0;
+int PDOWN = 0;
+int PLEFT = 0;
+int PRIGHT = 0;
+int STOP = 0;
+int RUN = 0;
+
+/*I2C EVENT*/
+void receiveEvent() 
+{
+  VICT = Wire.read();
+  IRR = Wire.read();
+  IRL = Wire.read();
+  GR = Wire.read();
+  OBS = Wire.read();
+  RUN = Wire.read();
+  PUP = Wire.read();
+  PDOWN = Wire.read();
+  PLEFT = Wire.read();
+  PRIGHT = Wire.read();
+  STOP = Wire.read();
+  
+}
+
+//Motor1
+const int MotorPin1 = 2;
+const int MotorPin2 = 3;
+//Motor2
+const int MotorPin3 = 4;
+const int MotorPin4 = 5;
+
+void setup() {
+    Serial.begin(9600);
+
+  /*I2C*/
+  Wire.begin();
+  Wire.begin(9);
+  Wire.onReceive(receiveEvent);
+  
+    //motor 1
+  pinMode(MotorPin1, OUTPUT);
+  pinMode(MotorPin2, OUTPUT);
+  
+  //motor 2
+  pinMode(MotorPin3, OUTPUT);
+  pinMode(MotorPin4, OUTPUT);
+
+  current_state state = State_running;
+}
+void loop() {
+
+
+  switch (state)
+  {
+    case State_running:
+    {
+      Serial.print("running\n");
+      RUN == 1;
+        digitalWrite(MotorPin1, HIGH);
+        digitalWrite(MotorPin2, LOW);
+        digitalWrite(MotorPin3, HIGH);
+        digitalWrite(MotorPin4, LOW);
+      if(VICT == 1)
+      {
+        state = State_victim;
+        digitalWrite(MotorPin1, LOW);
+        digitalWrite(MotorPin2, HIGH);
+        digitalWrite(MotorPin3, LOW);
+        digitalWrite(MotorPin4, HIGH);
+      }
+
+      if(GR == 1)
+      {
+        state = State_ground;
+        digitalWrite(MotorPin1, HIGH);
+        digitalWrite(MotorPin2, LOW);
+        digitalWrite(MotorPin3, HIGH);
+        digitalWrite(MotorPin4, LOW);
+        delay (200);
+      }
+      if(OBS == 1)
+      {
+        state = State_obstacle;
+        digitalWrite(MotorPin1, HIGH);
+        digitalWrite(MotorPin2, LOW);
+        digitalWrite(MotorPin3, HIGH);
+        digitalWrite(MotorPin4, LOW);
+        delay (200);
+      }
+
+      if(IRR == 1)
+      {
+        state = State_irrechts;
+        digitalWrite(MotorPin1, HIGH);
+        digitalWrite(MotorPin2, LOW);
+        digitalWrite(MotorPin3, HIGH);
+        digitalWrite(MotorPin4, LOW);
+        delay (200);
+      }
+
+      if(IRL == 1)
+      {
+        state = State_irlinks;
+        digitalWrite(MotorPin1, HIGH);
+        digitalWrite(MotorPin2, LOW);
+        digitalWrite(MotorPin3, HIGH);
+        digitalWrite(MotorPin4, LOW);
+        delay (200);
+      }
+      
+    }
+    break;
+    case State_stop:
+    {
+      Serial.print("Takeover");
+      STOP = 1;
+      digitalWrite(MotorPin1, LOW);
+      digitalWrite(MotorPin2, LOW);
+      digitalWrite(MotorPin3, LOW);
+      digitalWrite(MotorPin4, LOW);
+
+        if(PUP)
+        Serial.print("UP");
+        {
+        state = State_parkingup;
+        digitalWrite(MotorPin1, HIGH);
+        digitalWrite(MotorPin2, LOW);
+        digitalWrite(MotorPin3, HIGH);
+        digitalWrite(MotorPin4, LOW);
+        }
+
+        if(PDOWN)
+        {
+        state = State_parkingdown;
+        digitalWrite(MotorPin1, LOW);
+        digitalWrite(MotorPin2, HIGH);
+        digitalWrite(MotorPin3, LOW);
+        digitalWrite(MotorPin4, HIGH);
+        }
+
+        if(PLEFT)
+        {
+        state = State_parkingleft;
+        digitalWrite(MotorPin1, LOW);
+        digitalWrite(MotorPin2, LOW);
+        digitalWrite(MotorPin3, LOW);
+        digitalWrite(MotorPin4, LOW);          
+        }
+
+        if(PRIGHT)
+        {
+        state = State_parkingright;
+        digitalWrite(MotorPin1, LOW);
+        digitalWrite(MotorPin2, LOW);
+        digitalWrite(MotorPin3, LOW);
+        digitalWrite(MotorPin4, LOW);            
+        }
+    }
+  }
+}
